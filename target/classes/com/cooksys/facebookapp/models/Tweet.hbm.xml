@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Aug 18, 2014 11:29:33 AM by Hibernate Tools 3.4.0.CR1 -->
+<hibernate-mapping>
+    <class name="com.cooksys.facebookapp.models.Tweet" table="tweet" catalog="assessment">
+        <id name="tweetId" type="java.lang.Integer">
+            <column name="tweet_id" />
+            <generator class="identity" />
+        </id>
+        <many-to-one name="user" class="com.cooksys.facebookapp.models.User" fetch="select">
+            <column name="user_id" not-null="true" />
+        </many-to-one>
+        <property name="tweet" type="string">
+            <column name="tweet" length="45" not-null="true" />
+        </property>
+        <property name="type" type="string">
+            <column name="type" length="45" not-null="true" />
+        </property>
+        <property name="isConvo" type="int">
+            <column name="isConvo" not-null="true">
+                <comment>User ID of the user involved in the conversation</comment>
+            </column>
+        </property>
+    </class>
+</hibernate-mapping>

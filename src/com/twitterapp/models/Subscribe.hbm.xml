@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.twitterapp.models.Subscribe" table="subscribe" catalog="assessment">
+        <id name="subscribeId" type="java.lang.Integer">
+            <column name="subscribe_id" />
+            <generator class="identity" />
+        </id>
+        <property name="userName" type="string">
+            <column name="user_name" length="45" not-null="true" />
+        </property>
+        <property name="subscribedUserName" type="string">
+            <column name="subscribed_user_name" length="45" not-null="true" />
+        </property>
+    </class>
+</hibernate-mapping>

@@ -1,0 +1,130 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head></h:head>
+<h:body>
+	<h1>Wall Page :P</h1>
+
+
+	<h:panelGrid columns="2" cellpadding="5">
+		<p:panel id="searchpanel" header="Search for a Friend"
+			style="width:20em; height:12em">
+			<h:panelGrid columns="2" cellpadding="5">
+				<h:outputLabel for="search" value="Search for: " />
+				
+				<h:form>
+					<p:selectOneMenu id="search" value="#{databaseBean.testString}">
+						<f:selectItems value="#{databaseBean.getAllUserNames()}" var="name"
+							itemValue="#{databaseBean.getAllUserNames()}" noSelectionValue="" />
+					</p:selectOneMenu>
+
+				<p:separator></p:separator>
+				
+					<p:commandButton action="#{databaseBean.createFriendRequest()}"
+						value="Send Friend Request" />
+				</h:form>
+
+			</h:panelGrid>
+		</p:panel>
+		<p:panel id="friendlist" header="Friend List"
+			style="width:20em; height:12em">
+			<h:panelGrid columns="2" cellpadding="5">
+				<h:outputLabel for="select" value="Select friend: " />
+
+				<h:selectOneMenu id="select" value="String">
+
+				</h:selectOneMenu>
+
+				<h:form>
+					<p:commandButton value="View Wall" />
+				</h:form>
+				
+				
+				
+				<div>
+					<p:separator />
+					
+					<h:form rendered="#{databaseBean.hasPendingRequests()}">           
+					    <p:growl id="message" showDetail="true" />
+					 
+					    <p:commandButton  id="friend" value="#{databaseBean.pendingRequests().get(0).getUserName()}" 
+					    		actionListener="#{friendRequestUI.friendRequestMessage()}" update="message">
+					        <p:confirm header="Confirmation" action="#{databaseBean.createFriendRequest(friend)}" 
+					        	message="Accept friend request" icon="ui-icon-alert" />
+					    </p:commandButton>
+					 
+					    <p:confirmDialog global="true" showEffect="fade" hideEffect="explode">
+					        <p:commandButton value="Accept" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+					        <p:commandButton value="Decline" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+					    </p:confirmDialog>
+					</h:form>
+				</div>
+			</h:panelGrid>
+			
+			
+		</p:panel>
+		<p:panel>
+			<h:form>
+				<h:commandButton action="#{navigationHandler.toHomePage()}"
+					value="Return Home" />
+			</h:form>
+		</p:panel>
+
+	</h:panelGrid>
+
+
+	<h:form>
+		<h:inputText value="${tweetImpl.messageBody}" />
+		<p:commandButton action="#{databaseBean.saveMessage('public')}"
+			value="Post" />
+	</h:form>
+
+	<h:form>
+		<h:panelGrid columns="2" cellpadding="5">
+			<p:dataTable id="wall" var="posts"
+				value="#{databaseBean.getPublicMessages()}"
+				style="width:40em; height:40em">
+				<p:column headerText="Username">
+					<h:outputText value="#{posts.user.userName}" />
+				</p:column>
+				<p:column headerText="Posts">
+					<h:outputText value="#{posts.tweet}" />
+				</p:column>
+			</p:dataTable>
+			<p:dataTable style="width:25em; height:40em; overflow:auto">
+			</p:dataTable>
+		</h:panelGrid>
+	</h:form>
+	
+	<h:form>
+		<p:panel id="panel" head="Create Inbox Message">
+			<h:panelGrid columns="2" cellpadding="5">
+				<h:outputLabel for="inbox" value="Select to Inbox: " />
+				<h:selectOneMenu id="search" value="#{databaseBean.testUserName}">
+					<f:selectItems value="#{databaseBean.allUserNames}" var="u"
+						 noSelectionValue="" />
+				</h:selectOneMenu>
+			</h:panelGrid>
+		</p:panel>
+		<h:panelGrid columns="1">
+			<p:commandButton action="#{databaseBean.findIdByName(databaseBean.testUser)}" value="Compose Message"
+				update="messages" />
+		</h:panelGrid>
+		<p:dataTable id="messages" var="msgs"
+				value="#{databaseBean.getPrivateConversation()}"
+				style="width:40em; height:40em">
+				<p:column headerText="Username">
+					<h:outputText value="#{msgs.user.userName}" />
+				</p:column>
+				<p:column headerText="Posts">
+					<h:outputText value="#{posts.tweet}" />
+				</p:column>
+			</p:dataTable>
+	</h:form>
+
+</h:body>
+</html>

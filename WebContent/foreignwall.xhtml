@@ -1,0 +1,32 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head></h:head>
+<h:body>
+
+	<h:form>
+		<h:commandButton action="#{navigationHandler.toWallPage()}"
+			value="Back to Your Wall" />
+	</h:form>
+
+	<h:form>
+		<h:panelGrid columns="2" cellpadding="5">
+			<p:dataTable id="friendwall" var="fposts"
+				value="#{databaseBean.displayFriendWall()}"
+				style="width:40em; height:40em">
+				<p:column headerText="Username">
+					<h:outputText value="#{fposts.user.userName}" />
+				</p:column>
+				<p:column headerText="Posts">
+					<h:outputText value="#{fposts.tweet}" />
+				</p:column>
+			</p:dataTable>			
+		</h:panelGrid>
+	</h:form>
+
+</h:body>
+</html>

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Aug 18, 2014 11:29:33 AM by Hibernate Tools 3.4.0.CR1 -->
+<hibernate-mapping>
+    <class name="com.cooksys.facebookapp.models.User" table="user" catalog="assessment">
+        <id name="userId" type="java.lang.Integer">
+            <column name="user_id" />
+            <generator class="identity" />
+        </id>
+        <property name="userName" type="string">
+            <column name="user_name" length="45" not-null="true" unique="true" />
+        </property>
+        <property name="userPassword" type="string">
+            <column name="user_password" length="45" not-null="true" />
+        </property>
+        <set name="tweets" table="tweet" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="user_id" not-null="true" />
+            </key>
+            <one-to-many class="com.cooksys.facebookapp.models.Tweet" />
+        </set>
+    </class>
+</hibernate-mapping>

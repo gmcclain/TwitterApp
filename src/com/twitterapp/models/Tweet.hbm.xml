@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.twitterapp.models.Tweet" table="tweet" catalog="assessment">
+        <id name="tweetId" type="java.lang.Integer">
+            <column name="tweet_id" />
+            <generator class="identity" />
+        </id>
+        <many-to-one name="user" class="com.twitterapp.models.User" fetch="select">
+            <column name="user_id" not-null="true" />
+        </many-to-one>
+        <property name="tweet" type="string">
+            <column name="tweet" length="45" not-null="true" />
+        </property>
+        <property name="type" type="string">
+            <column name="type" length="45" not-null="true" />
+        </property>
+        <property name="isConvo" type="int">
+            <column name="isConvo" not-null="true">
+                <comment>User ID of the user involved in the conversation</comment>
+            </column>
+        </property>
+    </class>
+</hibernate-mapping>

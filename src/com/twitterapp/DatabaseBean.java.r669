@@ -1,0 +1,370 @@
+package com.cooksys.facebookapp;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.dialect.FirebirdDialect;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.cooksys.facebookapp.models.Subscribe;
+import com.cooksys.facebookapp.models.Tweet;
+import com.cooksys.facebookapp.models.User;
+
+/**
+ * The Database Bean handles all interactions with the database. It has an
+ * autowired Session Factory and current User, if there is one.
+ * 
+ * @author Jay Durham
+ *
+ */
+@Component
+@Scope("session")
+public class DatabaseBean {
+
+	@Autowired
+	private SessionFactory sessionFactory;
+
+//	@Autowired
+//	private UserImpl currentUser;
+
+	@Autowired
+	private TweetImpl tweetImpl;
+	
+	private List<Tweet> tweetList;
+	
+	private String testString;
+
+	@Autowired 
+	private AuthenticationBean authBean;
+
+	private List<User> listOfUsers;
+	
+	private List<String> listOfUserNames;
+	
+	/**
+	 * Use this method to retrieve a list of Users whose name matches %name%.
+	 * 
+	 * 
+	 * @param name
+	 *            the name of the user searched for
+	 * @return List<User> a list of users who match the HQL query based on the
+	 *         argument with wildcards
+	 */
+	@Transactional
+	public List<User> getUsersByName(String name) {
+		List<User> userList;
+
+		Session session = sessionFactory.getCurrentSession();
+
+		Query query = session.createQuery("FROM User WHERE userName LIKE '%"
+				+ name + "%'");
+		userList = (List<User>) query.list();
+
+		return userList;
+	}
+	
+	/**
+	 * This method returns a list with all users registered on the DB
+	 * @return List<User>
+	 */
+	@Transactional
+	public List<String> getAllUserNames() {
+		List<User> userList;
+		
+		Session session = sessionFactory.getCurrentSession();
+
+		Query query = session.createQuery("FROM User");
+		userList = (List<User>) query.list();
+		
+		listOfUserNames = new ArrayList<>();
+		for (User u : userList) {
+			listOfUserNames.add(u.getUserName());
+		}
+		
+		return listOfUserNames;
+	}
+
+	/**
+	 * Returns a single User whose ID matches your argument
+	 * 
+	 * @param userid
+	 *            unique ID of User
+	 * @return the user whose ID matches the argument
+	 */
+	@Transactional
+	public User getUserbyId(int userid) {
+		User user;
+
+		Session session = sessionFactory.getCurrentSession();
+
+		Query query = session.createQuery("FROM User WHERE userId = '" + userid
+				+ "'");
+		user = (User) query.uniqueResult();
+
+		return user;
+	}
+
+	/**
+	 * Use this method to save a new User to the database.
+	 * 
+	 * @param username
+	 * @param password
+	 * @return returns true after User is saved to DB
+	 */
+	@Transactional
+	public boolean registerUser(String username, String password) {
+		User newUser = new User(username, password);
+
+		Session session = sessionFactory.getCurrentSession();
+
+		session.save(newUser);
+
+		return true;
+	}
+
+	/**
+	 * Use this method to save a message to the DB. It may be more efficient to
+	 * save messages in batches rather than individually. If this is necessary I
+	 * can add the functionality later.
+	 * 
+	 * @param messageBody
+	 * @param type
+	 *            Is the message public or private?
+	 * @return
+	 */
+	@Transactional
+	public boolean saveMessage(String type) {
+		Tweet message = new Tweet();
+		User user;
+
+		Session session = sessionFactory.getCurrentSession();
+
+		String username = authBean.getCurrentUser().getUserName();
+		
+		user = getUsersByName(username).get(0);
+
+		message.setTweet(tweetImpl.getMessageBody());
+		message.setUser(user);
+		message.setType(type);
+
+		session.save(message);
+
+		return true;
+	}
+
+	/**
+	 * This method is intended for private messages. The userid param indicates
+	 * the recipient of the message.
+	 * 
+	 * @param messageBody
+	 * @param type
+	 * @param userid
+	 * @return
+	 */
+	@Transactional
+	public boolean saveMessage(String type, int userid) {
+		Tweet message = new Tweet();
+		User user;
+
+		Session session = sessionFactory.getCurrentSession();
+
+		Query query = session.createQuery("FROM User WHERE userName = :name AND userPassword = :password");
+		query.setParameter("name", authBean.getCurrentUser().getUserName());
+		query.setParameter("password", authBean.getCurrentUser().getPassword());
+		user = (User) query.uniqueResult();
+
+		message.setTweet(tweetImpl.getMessageBody());
+		message.setUser(user);
+		message.setType(type);
+
+		session.save(message);
+
+		return true;
+	}
+
+	/**
+	 * Saves List<Tweet> to DB.
+	 * 
+	 * @param messageList
+	 * @return returns true when messages are added
+	 */
+	@Transactional
+	public boolean saveMessages(List<Tweet> messageList) {
+
+		Session session = sessionFactory.getCurrentSession();
+
+		// add messages if required fields not null
+		for (Tweet message : messageList) {
+			if (!(message.getUser() == null) && !(message.getType() == null)
+					&& !(message.getTweet() == null)) {
+				session.save(message);
+			} else
+				System.out.println("Invalid message skipped");
+		}
+
+		return true;
+	}
+
+	/**
+	 * This method retrieves all public messages belonging to the given User
+	 * 
+	 * @param user
+	 * @return List<Tweet> contains all the user's public messages
+	 */
+	@Transactional
+	public List<Tweet> getPublicMessages() {
+		List<Tweet> messageList;
+
+		Session session = sessionFactory.getCurrentSession();
+		
+		Query query = session.createQuery("FROM Tweet WHERE user = :user");
+		query.setParameter("user", getUserbyId(authBean.getCurrentUser().getUserId()));
+
+		messageList = (List<Tweet>) query.list();
+
+		tweetList = new ArrayList<>();
+		for (Tweet t : messageList) {
+			if(t != null){
+				tweetList.add(t);
+			}
+		}
+		
+		return tweetList;
+	}
+
+	public List<Tweet> getTweetList() {
+		return tweetList;
+	}
+
+	public void setTweetList(List<Tweet> tweetList) {
+		this.tweetList = tweetList;
+	}
+
+	/**
+	 * This method retrieves private messages between two users, one passed as a
+	 * user object, the other passed as a user id.
+	 * 
+	 * @param user1
+	 * @param user2id
+	 * @return List<Tweet> contains all messages sent privately between two
+	 *         users
+	 */
+	@Transactional
+	public List<Tweet> getPrivateConversation(User user1, int user2id) {
+		List<Tweet> messageList;
+
+		Session session = sessionFactory.getCurrentSession();
+
+		Query query = session
+				.createQuery("FROM Tweet WHERE (User = :user1) AND (type = 'private') AND (isConvo = :user2id)");
+		query.setParameter("user1", user1);
+		query.setParameter("user2id", user2id);
+		messageList = (List<Tweet>) query.list();
+
+		tweetList = new ArrayList<>();
+		for (Tweet t : messageList) {
+			tweetList.add(t);
+		}
+		
+		return tweetList;
+	}
+
+	/**
+	 * This method retrieves a list of all a user's friends
+	 * where friends are represented by the presence of mutual 
+	 * subscribe objects between 2 users
+	 * 
+	 * @param user
+	 * @return List<User> the user's friends
+	 */
+	@Transactional
+	public List<User> getFriendsFromDB(User user) {
+		List<User> friendList = new ArrayList<>();
+		List<String> nameList;
+
+		Session session = sessionFactory.getCurrentSession();
+
+		Query query = session
+				.createQuery("FROM Subscribe WHERE userName = :username");
+		query.setParameter("username", user.getUserName());
+		nameList = (List<String>) query.list();
+
+		// turn usernames into users
+		// this will be an issue if we have multiples users with the same name
+		for (String s : nameList) {
+			Query q = session
+					.createQuery("FROM User WHERE userName = :username");
+			friendList.add((User) q.uniqueResult());
+		}
+
+		return friendList;
+	}
+
+	/**
+	 * Create a friendship in the DB between two users
+	 * 
+	 * @param user1
+	 * @param user2
+	 * @return true after update is complete
+	 */
+	@Transactional
+	public boolean createFriendRequest(String requesteeName) {
+		// Create 2 subscribe object to represent a mutual friendship
+		Subscribe request = new Subscribe();
+		String requesterName;
+		
+		requesterName = authBean.getCurrentUser().getUserName();
+		
+		request.setUserName(requesterName);
+		request.setSubscribedUserName(requesteeName);
+		
+		Session session = sessionFactory.getCurrentSession();
+
+		session.save(request);
+
+		System.out.println("subscribe added to DB!");
+		
+		return true;
+	}
+
+	/**
+	 * Checks if 2 users are already friends
+	 * 
+	 * @param user1
+	 * @param user2
+	 * @return true if users are friends, false if not
+	 */
+	@Transactional
+	public boolean alreadyFriends(User user1, User user2) {
+		Object o;
+
+		Session session = sessionFactory.getCurrentSession();
+
+		Query query = session
+				.createQuery("FROM Subscribe WHERE ((userName = :name1) AND (subscribedUserName = :name2)) "
+						+ "AND ((userName = :name2) AND (subscribedUserName = :name1))");
+		query.setParameter("name1", user1.getUserName());
+		query.setParameter("user2", user2.getUserName());
+		o = query.uniqueResult();
+
+		if (o == null) {
+			return false;
+		} else
+			return true;
+	}
+	
+	public String getTestString() {
+		return testString;
+	}
+
+	public void setTestString(String testString) {
+		this.testString = testString;
+	}
+	
+}

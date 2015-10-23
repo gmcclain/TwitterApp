@@ -1,0 +1,29 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head></h:head>
+<h:body>	
+	<h:form>
+	<p:panel header="Facebook Registration">	
+		<h:panelGrid columns="2" cellpadding="5">
+			<h:outputText value="Username" />
+			<p:inputText id="name" required="true" value="${userImpl.userName}" />
+			
+			<h:outputText value="Password" />
+			<p:password id="password" required="true" value="${userImpl.password}" />
+			
+			<h:commandButton action="#{databaseBean.registerUser(userImpl.userName,userImpl.password)}" value="Register" />
+		</h:panelGrid>
+		</p:panel>
+	</h:form>
+	
+	<h:form>
+		<h:commandButton action="#{navigationHandler.toHomePage()}" value="Return Home" />
+	</h:form>
+
+</h:body>
+</html>
