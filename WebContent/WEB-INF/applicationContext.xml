@@ -12,7 +12,7 @@
     http://www.springframework.org/schema/aop 
     http://www.springframework.org/schema/aop/spring-aop-3.1.xsd">
 
-	<context:component-scan base-package="com.cooksys.facebookapp" />
+	<context:component-scan base-package="com.twitterapp" />
 
 	<tx:annotation-driven transaction-manager="txManager" />
 
@@ -34,7 +34,7 @@
 		<property name="scopes">
 			<map>
 				<entry key="view">
-					<bean class="com.cooksys.facebookapp.ViewScope" />
+					<bean class="com.twitterapp.ViewScope" />
 				</entry>
 			</map>
 		</property>
